@@ -1,0 +1,30 @@
+{
+  "name": "nodezoo-validate",
+  "version": "1.0.0-tms-dev",
+  "description": "nodezoo-validate",
+  "main": "validate.js",
+  "keywords": [
+    "nodezoo",
+    "seneca",
+    "validate",
+    "microservice"
+  ],
+  "scripts": {
+    "test": "lab -P test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nodezoo/nodezoo-validate.git"
+  },
+  "author": "Richard Rodger (http://richardrodger.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nodezoo/nodezoo-validate/issues"
+  },
+  "homepage": "https://github.com/nodezoo/nodezoo-validate",
+  "dependencies": {
+    "seneca": "3.3.0",
+    "seneca-entity": "2.0.0",
+    "wreck": "12.0.0"
+  }
+}
