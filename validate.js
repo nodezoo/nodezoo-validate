@@ -81,19 +81,76 @@ module.exports = function validate (options) {
 
   function validate_search(seneca, res, done) {
     done = done.bind(null,'search')
-    done()
+
+    var mod = 'mod'+((Math.random()+'').substring(2))
+
+    seneca.act(
+      'role:search,cmd:insert', 
+      {data:{
+        name:mod,version:'0.0.1',desc:mod,id:mod
+      }},
+      function (err, out) {
+        if(err) { 
+          res.errors.push(err); 
+          res.services.search = 0; 
+          return done()
+        }
+        res.services.search = out._id === mod
+        
+        if (res.services.search) {
+          setTimeout(function () {
+            seneca.act(
+              'role:search,cmd:search,query:'+mod, 
+              function (err, out) {
+                if(err) { 
+                  res.errors.push(err); 
+                  res.services.search = 0; 
+                  return done()
+                }
+
+                res.services.search = out.items[0].name === mod
+                done()
+              })
+          }, 3333)
+        }
+      })
   }
 
 
   function validate_info(seneca, res, done) {
     done = done.bind(null,'info')
-    done()
+
+    seneca
+      .act('role:info,cmd:get,name:nid', function (err, out) {
+        if(err) { 
+          res.errors.push(err); 
+          res.services.info = 0; 
+          return done()
+        }
+        
+        res.services.info = ( 'nid' === out.npm.name &&
+                              'nid' === out.github.repo )
+
+        done()
+      })
   }
 
 
   function validate_npm(seneca, res, done) {
     done = done.bind(null,'npm')
-    done()
+
+    seneca
+      .act('role:npm,cmd:get,name:nid', function (err, out) {
+        if(err) { 
+          res.errors.push(err); 
+          res.services.npm = 0; 
+          return done()
+        }
+        
+        res.services.npm = ( 'nid' === out.id )
+
+        done()
+      })
   }
 
 }

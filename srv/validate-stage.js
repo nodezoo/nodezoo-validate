@@ -8,8 +8,8 @@ var STATS_HOST = process.env.STATS_HOST || 'localhost'
 
 var Seneca = require('seneca')
 
-Seneca({tag: 'repl'})
-  .test('print')
+Seneca({tag: 'repl', timeout: 99999})
+  // .test('print')
   .listen(PORT)
 
   .use('entity')
