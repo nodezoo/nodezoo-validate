@@ -21,23 +21,45 @@ module.exports = function validate (options) {
 
     validate_web(this, res, done)
     validate_search(this, res, done)
-    validate_info(this, res, done)
     validate_npm(this, res, done)
+    validate_info(this, res, done)
     validate_suggest(this, res, done)
 
 
+    var seen = []
     function done(service) {
+      seen.push(service)
+
       var data = new Buffer('deployrisk.service.validate.'+service+':'+
                             (res.services[service]?1:0)+'|g')
 
-      console.log(data.toString())
+      console.log('SERVICE', data.toString(), options.host)
       client.send(data, 0, data.length, options.port, options.host,
                   function(err) { if (err) seneca.log.warn(err) })
 
-      if (5 == Object.keys(res.services).length) {
+      
+      if (5 === seen.length) {
+        console.log('ERRORS', res.errors)
         reply(res)
       }
     }
+
+    setTimeout(function () {
+      if (5 === seen.length) return
+
+      var services = [
+        'web',
+        'search',
+        'npm',
+        'info',
+        'suggest'
+      ]
+
+      services.forEach(function (service) {
+        res.services[service] = res.services[service] || 0
+        done(service)
+      })
+    }, 2222)
   }
 
 
@@ -74,7 +96,19 @@ module.exports = function validate (options) {
         }
 
         res.services.web = ( -1 != payload.toString().indexOf('nid'))
-        done()
+
+        Wreck.get(
+          'http://web:8000/api/query?q=nid',
+          function (err, result, payload) {
+            if(err) { 
+              res.errors.push(err); 
+              res.services.web = 0; 
+              return done()
+            }
+        
+            res.services.web = ( -1 != payload.toString().indexOf('nid'))
+            done()
+          })
       })
   }
 
@@ -128,8 +162,8 @@ module.exports = function validate (options) {
           return done()
         }
         
-        res.services.info = ( 'nid' === out.npm.name &&
-                              'nid' === out.github.repo )
+        res.services.info = ( 'nid' === (out.npm && out.npm.name) &&
+                              'nid' === (out.github && out.github.repo) )
 
         done()
       })
