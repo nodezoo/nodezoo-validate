@@ -1,0 +1,9 @@
+
+FROM nodezoo-validate:1
+
+CMD ["node", "/app/srv/validate-prod.js"]
+
+
+
+
+
